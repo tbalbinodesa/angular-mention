@@ -2,7 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-import { MatAutocomplete } from '@angular/material/autocomplete';
+import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { MatOptionSelectionChange } from '@angular/material/core';
 
 @Component({
@@ -20,6 +20,7 @@ export class AppComponent implements OnInit {
   options: string[] = ['One', 'Two', 'Three'];
 
   @ViewChild('inputAuto') inputAuto: ElementRef;
+  @ViewChild('trigger') trigger: MatAutocompleteTrigger;
   @ViewChild('fakeInput') fakeInput: ElementRef;
   @ViewChild('editableText') editableText: ElementRef;
   @ViewChild('auto') auto: MatAutocomplete;
@@ -53,7 +54,7 @@ export class AppComponent implements OnInit {
     this.text = textContent;
     if (textContent && textContent.match(/@/g)) {
       console.log('valued matched');
-      // this.inputAuto.nativeElement.focus();
+      this.trigger.openPanel();
       this.hiddenInput = this.text.split('@')[1];
       console.log(this.hiddenInput);
     }
@@ -104,7 +105,7 @@ export class AppComponent implements OnInit {
 
   dismissAutocompletePanel() {
     console.log('trying to close autocomplete panel.');
-    this.auto.closed.emit();
+    this.trigger.closePanel();
     this.editableText.nativeElement.focus();
   }
 
