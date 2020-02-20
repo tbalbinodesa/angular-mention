@@ -12,15 +12,15 @@ import { MatOptionSelectionChange } from '@angular/material/core';
 })
 export class AppComponent implements OnInit {
 
-  text = 'digite...';
-  hiddenInput = '';
+  text = String('digite...');
   autoCompleteControl = new FormControl();
   isEditing = false;
   // TODO: fetch the options from Users and Users group
   options: string[] = ['One', 'Two', 'Three'];
+  mentions: string[] = [];
+  isMentioning = false;
 
-  @ViewChild('inputAuto') inputAuto: ElementRef;
-  @ViewChild('trigger') trigger: MatAutocompleteTrigger;
+  @ViewChild(MatAutocompleteTrigger) inputAuto: MatAutocompleteTrigger;
   @ViewChild('fakeInput') fakeInput: ElementRef;
   @ViewChild('editableText') editableText: ElementRef;
   @ViewChild('auto') auto: MatAutocomplete;
@@ -36,77 +36,92 @@ export class AppComponent implements OnInit {
   }
 
   private _filter(value: string): string[] {
-    const filterValue = value.toLowerCase();
+    const filterValue = value && value.toLowerCase();
     return this.options.filter(option => option.toLowerCase().includes(filterValue));
   }
 
+  private openAutoCompletePanel() {
+    this.inputAuto.openPanel();
+  }
+
+  private dismissAutocompletePanel() {
+    this.inputAuto.closePanel();
+    this.autoCompleteControl.setValue('');
+    this.isMentioning = false;
+  }
+
   /*
   * TODO:
-  *  [] multiple mentions
-  *  [] on backspace clean @ char
+  *  [x] on backspace clean @ char
   *  [] shortcut for activate autocomplete panel
+  *  [] multiple mentions
   * */
   activateAutoComplete($event: any) {
-    console.log('event change fake: ', $event);
-    console.log('text value: ', this.text);
-
-    const { textContent } = $event.target;
+    const {textContent} = $event.target;
     this.text = textContent;
-    if (textContent && textContent.match(/@/g)) {
-      console.log('valued matched');
-      this.trigger.openPanel();
-      this.hiddenInput = this.text.split('@')[1];
-      console.log(this.hiddenInput);
-    }
-  }
-
-  // TODO: this needs to match multiples @s not only the first
-  increaseValue(value: string) {
-    console.log(value, 'increase value method');
-    if (this.editableText) {
-      this.text = `${this.editableText.nativeElement.textContent.split('@')[0]}@${value}`;
-    }
   }
 
   /*
   * TODO:
-  *  [] when leave the autocomplete input clean values
+  *  [x] when leave the autocomplete input clean values
   *  [] return focus to editable content at the end
-  *  [] close autocomplete panel
+  *  [x] close autocomplete panel
   * */
   handleKey($event: KeyboardEvent) {
-    const { key } = $event;
+    const {key, ctrlKey, code} = $event;
+    console.log('keydown: ', $event);
+
+    if (this.isMentioning) {
+      if (key === 'Backspace') {
+        this.autoCompleteControl.setValue(this.autoCompleteControl.value.slice(0, -1));
+      } else {
+        if (this.autoCompleteControl.value) {
+          this.autoCompleteControl.setValue(`${this.autoCompleteControl.value}${key}`);
+        } else if (code.match('Key')) {
+          this.autoCompleteControl.setValue(key);
+        }
+      }
+    }
+
+    if (key === '@') {
+      console.log('@ was pressed');
+      this.inputAuto.openPanel();
+      this.isMentioning = true;
+      return;
+    }
+
+    if (code === 'Space') {
+      console.log('Space was pressed.');
+      if (this.inputAuto.panelOpen) {
+        this.dismissAutocompletePanel();
+        this.manageMentions();
+      }
+    }
+
     if (key === 'Enter') {
-      console.log('enter pressed');
+      this.dismissAutocompletePanel();
+      this.manageMentions();
+    }
+
+    if (key === 'Backspace' && this.autoCompleteControl.value === '') {
       this.dismissAutocompletePanel();
     }
 
-    if (key === 'Backspace' && this.hiddenInput === '') {
-      console.log('backspace pressed without value on input');
-      this.text = this.text.replace(/@$/g, '');
-      this.handleCursor();
-      this.dismissAutocompletePanel();
+    if (ctrlKey && code === 'Space') {
+      this.openAutoCompletePanel();
+    }
+
+    if (this.inputAuto.panelOpen) {
+      this.inputAuto.updatePosition();
     }
   }
 
-  suggestionSelect($event: MatOptionSelectionChange) {
-    console.log('option selection changed: ', $event);
-  }
-
-  handleFocus($event: FocusEvent) {
-    console.log('focus on text event: ', $event);
+  handleFocus() {
     this.handlePlaceholder();
   }
 
-  handleBlur($event: FocusEvent) {
-    console.log('blur on text event: ', $event);
+  handleBlur() {
     this.handlePlaceholder();
-  }
-
-  dismissAutocompletePanel() {
-    console.log('trying to close autocomplete panel.');
-    this.trigger.closePanel();
-    this.editableText.nativeElement.focus();
   }
 
   handlePlaceholder() {
@@ -122,20 +137,17 @@ export class AppComponent implements OnInit {
     }
   }
 
-  handleCursor() {
-    const range = new Range();
-    const selection = window.getSelection();
-    const node = this.editableText.nativeElement.childNodes[0];
-    const offset = this.text.length - 1;
+  suggestionSelect($event: MatOptionSelectionChange) {
+    console.log('suggestion selection event: ', $event);
+  }
 
-    console.log('node e offset: ', node, offset);
+  manageMentions() {
+    const matches = this.text.match(/@[\w]{1,}/g);
+    if (matches && matches.length) {
+      this.mentions = matches.map(mention => mention.replace('@', ''));
+    }
 
-    range.setStart(node, offset);
-    range.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(range);
-
-    this.editableText.nativeElement.focus();
+    console.log('mentions: ', this.mentions);
   }
 }
 

@@ -4,20 +4,17 @@
          #editableText
          [contentEditable]="true"
          [textContent]="text"
-         (focus)="handleFocus($event)"
-         (blur)="handleBlur($event)"
+         (focus)="handleFocus()"
+         (blur)="handleBlur()"
+         (keydown)="handleKey($event)"
          (input)="activateAutoComplete($event)">
       {{text}}
     </div>
     <input class="hidden"
            type="text"
-           placeholder="Pick one"
+           placeholder=""
            aria-label="Number"
            matInput
-           #inputAuto
-           (ngModelChange)="increaseValue($event)"
-           [(ngModel)]="hiddenInput"
-           (keydown)="handleKey($event)"
            [formControl]="autoCompleteControl"
            [matAutocomplete]="auto">
   </div>
@@ -31,7 +28,3 @@
     </mat-autocomplete>
   </div>
 </div>
-
-<button #trigger matAutocompleteTrigger>
-  Trigger
-</button>
