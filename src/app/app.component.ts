@@ -74,10 +74,10 @@ export class AppComponent implements OnInit {
     if (this.isMentioning) {
       if (key === 'Backspace') {
         this.autoCompleteControl.setValue(this.autoCompleteControl.value.slice(0, -1));
-      } else {
+      } else if (code.match('Key')) {
         if (this.autoCompleteControl.value) {
           this.autoCompleteControl.setValue(`${this.autoCompleteControl.value}${key}`);
-        } else if (code.match('Key')) {
+        } else {
           this.autoCompleteControl.setValue(key);
         }
       }
@@ -99,6 +99,8 @@ export class AppComponent implements OnInit {
     }
 
     if (key === 'Enter') {
+      $event.preventDefault();
+      this.auto._keyManager.setActiveItem(this.auto._keyManager.activeItemIndex);
       this.dismissAutocompletePanel();
       this.manageMentions();
     }
@@ -109,6 +111,16 @@ export class AppComponent implements OnInit {
 
     if (ctrlKey && code === 'Space') {
       this.openAutoCompletePanel();
+    }
+
+    if (key === 'ArrowDown') {
+      $event.preventDefault();
+      this.auto._keyManager.setNextItemActive();
+    }
+
+    if (key === 'ArrowUp') {
+      $event.preventDefault();
+      this.auto._keyManager.setPreviousItemActive();
     }
 
     if (this.inputAuto.panelOpen) {
@@ -139,6 +151,15 @@ export class AppComponent implements OnInit {
 
   suggestionSelect($event: MatOptionSelectionChange) {
     console.log('suggestion selection event: ', $event);
+    console.log('suggestion selection value: ', $event.source.value);
+    const { source: {value}} = $event;
+    // TODO: clean inputted value and set suggestion value selected
+    const lastMentionIndex = this.text.lastIndexOf('@');
+    const lastMentionLength = this.text.slice(lastMentionIndex, this.text.length).length;
+    const substitute = `${this.text.substr(lastMentionIndex, lastMentionLength)}${value}`;
+    const replaced = this.text.slice(0, lastMentionIndex);
+    this.text = `${replaced}${substitute}`;
+    this.dismissAutocompletePanel();
   }
 
   manageMentions() {
