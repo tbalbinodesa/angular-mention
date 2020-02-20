@@ -1,7 +1,7 @@
 <div class="custom-autocomplete">
   <div class="d-flex w-100">
-    <div [class]="isEditing ? 'editable editing' : 'editable'"
-         #editableText
+    <div #editable
+         [class]="isEditing ? 'editable editing' : 'editable'"
          [contentEditable]="true"
          [textContent]="text"
          (focus)="handleFocus()"
@@ -15,6 +15,7 @@
            placeholder=""
            aria-label="Number"
            matInput
+           tabindex="-1"
            [formControl]="autoCompleteControl"
            [matAutocomplete]="auto">
   </div>
