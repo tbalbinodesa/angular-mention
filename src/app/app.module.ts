@@ -8,14 +8,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
-import { MentionsDirective } from './mentions.directive';
 import { MentionsComponent } from './mentions/mentions.component';
+import { CursorDirective } from './directives/cursor.directive';
 
 @NgModule({
   declarations: [
     AppComponent,
-    MentionsDirective,
-    MentionsComponent
+    MentionsComponent,
+    CursorDirective
   ],
   imports: [
     BrowserModule,

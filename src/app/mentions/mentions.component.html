@@ -1,13 +1,14 @@
 <div class="d-flex w-100">
   <div #editable
+       #cursor="cursor"
+       appCursor
        [class]="isEditing ? 'editable editing' : 'editable'"
        [contentEditable]="true"
-       [textContent]="text"
-       (focus)="handleFocus()"
-       (blur)="handleBlur()"
+       (focus)="handleFocus($event)"
+       (blur)="handleBlur($event)"
        (keydown)="handleKey($event)"
-       (input)="activateAutoComplete($event)">
-    {{text}}
+       (input)="editableTextInput($event)">
+    <p>{{editableText}}</p>
   </div>
   <input class="hidden"
          type="text"

@@ -4,6 +4,7 @@ import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autoc
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MatOptionSelectionChange } from '@angular/material/core';
+import { CursorDirective } from '../directives/cursor.directive';
 
 const MENTION_REGEX = new RegExp(/@[\w]+/g);
 
@@ -14,9 +15,10 @@ const MENTION_REGEX = new RegExp(/@[\w]+/g);
 })
 export class MentionsComponent implements OnInit {
 
-  constructor() { }
+  constructor() {
+  }
 
-  text = String('digite...');
+  editableText = String('digite...');
   autoCompleteControl = new FormControl();
   isEditing = false;
   isMentioning = false;
@@ -24,6 +26,7 @@ export class MentionsComponent implements OnInit {
   @ViewChild(MatAutocompleteTrigger) inputAuto: MatAutocompleteTrigger;
   @ViewChild('auto') auto: MatAutocomplete;
   @ViewChild('editable') editable: ElementRef;
+  @ViewChild('cursor') cursor: CursorDirective;
 
   @Input() options: string[];
   @Output() mentions = new EventEmitter<string[]>();
@@ -56,12 +59,16 @@ export class MentionsComponent implements OnInit {
   }
 
   private setSelectedText(value: string) {
-    console.log('setSelectedText()');
-    const lastMentionIndex = this.editable.nativeElement.textContent.lastIndexOf('@');
+    const lastMentionIndex = this.editableText.lastIndexOf('@');
     const substitute = `@${value}`;
-    const replaced = this.editable.nativeElement.textContent.slice(0, lastMentionIndex);
-    this.editable.nativeElement.textContent = `${replaced}${substitute}`;
-    const event = new InputEvent('input', { data: '', inputType: 'insertText', composed: true });
+    const replaced = this.editableText.slice(0, lastMentionIndex);
+    const event = new InputEvent('input', {
+      data: `${replaced}${substitute}`,
+      inputType: 'insertText',
+      isComposing: false,
+      composed: true,
+      bubbles: true
+    });
     this.editable.nativeElement.dispatchEvent(event);
   }
 
@@ -73,11 +80,15 @@ export class MentionsComponent implements OnInit {
     }
   }
 
-  activateAutoComplete($event: any) {
-    console.log('activateAutoComplete()', $event);
-    const {target: {textContent}} = $event;
-    this.text = textContent;
-    return;
+  editableTextInput($event: any) {
+    const {data, target: {textContent}} = $event;
+    if (data && data.length > 1) {
+      this.editable.nativeElement.textContent = data;
+      this.editableText = data;
+      this.cursor.setPos();
+    } else {
+      this.editableText = textContent;
+    }
   }
 
   /*
@@ -142,13 +153,15 @@ export class MentionsComponent implements OnInit {
     }
   }
 
-  handleFocus() {
+  handleFocus(event) {
     console.log('focused');
+    event.preventDefault();
     this.handlePlaceholder();
   }
 
-  handleBlur() {
+  handleBlur(event) {
     console.log('blurred');
+    event.preventDefault();
     this.handlePlaceholder();
   }
 
@@ -166,13 +179,13 @@ export class MentionsComponent implements OnInit {
   }
 
   suggestionSelect($event: MatOptionSelectionChange) {
-    const { source: {value}} = $event;
+    const {source: {value}} = $event;
+    console.log('suggestion event: ', value, $event);
     this.setSelectedText(value);
-    this.dismissAutocompletePanel();
   }
 
   manageMentions() {
-    const matches = this.editable.nativeElement.textContent.match(MENTION_REGEX);
+    const matches = this.editableText.match(MENTION_REGEX);
     if (matches && matches.length) {
       this.mentions.emit(matches.map(mention => mention.replace('@', '')));
     }
