@@ -10,6 +10,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
 import { MentionsComponent } from './mentions/mentions.component';
 import { CursorDirective } from './directives/cursor.directive';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
   declarations: [
@@ -26,6 +28,8 @@ import { CursorDirective } from './directives/cursor.directive';
     MatAutocompleteModule,
     MatInputModule,
     FormsModule,
+    MatMenuModule,
+    MatIconModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
