@@ -1,31 +1,6 @@
 <div class="custom-autocomplete">
-  <div class="d-flex w-100">
-    <div #editable
-         [class]="isEditing ? 'editable editing' : 'editable'"
-         [contentEditable]="true"
-         [textContent]="text"
-         (focus)="handleFocus()"
-         (blur)="handleBlur()"
-         (keydown)="handleKey($event)"
-         (input)="activateAutoComplete($event)">
-      {{text}}
-    </div>
-    <input class="hidden"
-           type="text"
-           placeholder=""
-           aria-label="Number"
-           matInput
-           tabindex="-1"
-           [formControl]="autoCompleteControl"
-           [matAutocomplete]="auto">
-  </div>
-  <div>
-    <mat-autocomplete #auto="matAutocomplete">
-      <mat-option *ngFor="let option of filteredOptions | async"
-                  [value]="option"
-                  (onSelectionChange)="suggestionSelect($event)">
-        {{option}}
-      </mat-option>
-    </mat-autocomplete>
-  </div>
+  <app-mentions
+    [options]="['One', 'Two', 'Three']"
+    (mentions)="addMention($event)"
+  ></app-mentions>
 </div>

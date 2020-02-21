@@ -1,0 +1,27 @@
+
+.editable {
+  width: 100%;
+  outline: none;
+}
+
+.editable.editing {
+  width: auto;
+  min-width: 10px;
+  padding-right: 5px;
+}
+
+.hidden {
+  width: 0;
+  height: 0;
+  border: 0;
+  padding: 0;
+  outline: none;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.w-100 {
+  width: 100%;
+}
